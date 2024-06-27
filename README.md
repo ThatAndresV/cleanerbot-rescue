@@ -63,7 +63,7 @@ That response_log is then parsed and presented to the player on a webpage. Most 
 	
 	
 6. **Populate your Google Cloud Storage bucket**
-	Copy the files in the /GCS folder to the bucket:
+	Unzip the files in GCS.zip and upload them to the bucket:
 	- `baseprompt.txt` - separated from the flask file for easier admin
 	- `s1.txt`, `s2.txt`, `s3.txt` - word lists used for saving a player's game state
 	- `gamesaves.txt`- csv containing saved games and their code phrases
