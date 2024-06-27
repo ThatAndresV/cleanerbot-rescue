@@ -1,0 +1,9 @@
+anthropic==0.28.0
+Flask
+Flask-Session==0.8.0
+google-cloud-speech==2.26.0
+google-cloud-storage==2.16.0
+gunicorn==22.0.0
+pyttsx3==2.90
+requests==2.31.0
+Werkzeug
