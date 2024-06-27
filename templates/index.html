@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cleanerbot Rescue</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        body {
+            background-color: black;
+            background-image: radial-gradient(rgba(0, 150, 0, 0.5), black 90%);
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            color: rgba(255, 255, 255, 0.7);
+            font: 1rem Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        ::selection {
+            background: #0080FF;
+            text-shadow: none;
+        }
+        pre {
+            margin: 0;
+        }
+        .send-command-btn {
+            font-size: 15px;
+            font-family: Courier New;
+            text-shadow: 0 0 2px #C8C8C8;
+            width: 140px;
+            height: 28px; 
+            border-width: 1px;
+            color: #ccc;
+            border-color: #3b6e22;
+            border-radius: 0;
+            box-shadow: inset 0px 0px 1px 0px #9acc85;
+            background-color: #550000;
+            position: absolute; 
+            bottom: 5px; /* Reduced space below the button */
+        }
+        .send-command-btn:disabled {
+            color: #777;
+            border-color: #555;
+            box-shadow: none;
+            text-shadow: none;
+            background-color: transparent;
+        }
+        .load-btn {
+            font-size: 15px;
+            font-family: Courier New;
+            text-shadow: 0 0 2px #C8C8C8;
+            width: 140px;
+            height: 28px; 
+            border-width: 1px;
+            color: #ccc;
+            border-color: #3b6e22;
+            border-radius: 0;
+            box-shadow: inset 0px 0px 1px 0px #9acc85;
+            background-color: #322792;
+            position: absolute; 
+            bottom: 5px; /* Reduced space below the button */
+        }
+        .load-btn:disabled {
+            color: #777;
+            border-color: #555;
+            box-shadow: none;
+            text-shadow: none;
+            background-color: transparent;
+        }
+        p {
+            margin-bottom: 5px;
+        }
+        h1 {
+            text-shadow: 0 0 2px #C8C8C8;
+            padding: 0px 0px 0px 10px;
+        }
+        .special {
+            color: #777;
+            padding: -3px;
+            margin-bottom: -15px;
+            margin-left: 10px;
+        }
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 10px;
+            padding: 1rem;
+            box-sizing: border-box;
+        }
+        .footer {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            padding: 0px 0px 0px 10px;
+            box-sizing: border-box;
+            position: relative;
+        }
+        .footer-center {
+            justify-content: center;
+        }
+        .footer > * {
+            margin: 5px 10px 5px 0;
+        }
+        #response-log p.special {
+            color: #777;
+        }
+        #response-log p.response {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .footer a {
+            color: #ccc;
+            text-decoration: none;
+        }
+        .goodbye {
+            color: #ccc;
+            text-decoration: none;
+            height: 60px;
+            white-space: nowrap;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+        .goodbye a {
+            width: 16px;
+            height: 16px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 16px;
+        }
+        .fa {
+            padding: 4px;
+            width: 20px;
+            text-align: center;
+            text-decoration: none;
+            margin: 1px 1px;
+        }
+        .fa:hover {
+            opacity: 0.7;
+        }
+    
+        .fa-facebook {
+            background: #3B5998;
+            color: white;
+        }
+    
+        .fa-twitter {
+            background: #55ACEE;
+            color: white;
+        }
+    
+        .fa-linkedin {
+            background: #007bb5;
+            color: white;
+        }
+        .button {
+            background-color: #009900;
+            border: 3;
+            border-color: white;
+            color: white;
+            padding: 8px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            font-weight: 900;
+            margin: 2px 2px;
+            cursor: pointer;
+        }
+        .button5 {
+            border-radius: 50%;
+        }
+        .top-right-button {
+            position: absolute;
+            top: 20px;
+            right: 5px;
+            z-index: 1000;
+        }
+        .footer .special, .goodbye .special {
+            position: absolute;
+            left: 160px;
+            top: 22px;
+        }
+    
+        /* Media query for screen widths below 430px */
+        @media (max-width: 430px) {
+            .footer, .goodbye {
+                height: 125px; /* Increased height to create space above the button */
+                position: relative; /* Ensure .footer and .goodbye are positioned relative to the containing block */
+            }
+            .footer .special, .goodbye .special {
+                position: absolute;
+                left: 140px;
+                top: 5px;
+                /* font-size: 12px; */
+            }
+            .send-command-btn, .send-command-btn:disabled, .load-btn, .load-btn:disabled {
+                width: 120px;
+                height: 56px; /* Increase height for two rows of text but only at low res*/
+                font-size: 12pt;
+                bottom: 65px; /* Adjusted to move the button slightly up */
+            }
+            .button {
+                font-size: 12px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+            
+    <script src="https://cdn.jsdelivr.net/npm/audio-recorder-polyfill/index.js"></script>
+    <script>
+        let initialResponsesLoaded = false;
+        let displayedResponses = new Set();
+        let fetchInterval;
+        let lastResponseTime = 0;
+        let inactivityTimeout;
+    
+        function updateFooterToGoodbye() {
+            const footer = document.querySelector('.footer');
+            footer.classList.add('footer-center');
+            footer.innerHTML = `
+                <div class="goodbye">
+                    Thanks for playing.<BR>Tell a friend.<BR>
+                    <a href="#" class="fa fa-linkedin"></a>
+                    <a href="#" class="fa fa-facebook"></a>
+                    <a href="#" class="fa fa-twitter"></a>
+                </div>
+            `;
+        }
+    
+        function resetFooter() {
+            const footer = document.querySelector('.footer');
+            footer.classList.remove('footer-center');
+            footer.innerHTML = `
+                <button id="sendCommandBtn" class="send-command-btn" onclick="startRecording()">SEND COMMAND</button>
+                <p class="special" id="special"></p>
+            `;
+            document.getElementById('sendCommandBtn').onclick = function() {
+                startRecording();
+            };
+            resetInactivityTimer();
+        }
+    
+        function updateFooterToLoad() {
+            const footer = document.querySelector('.footer');
+            footer.classList.remove('footer-center');
+            footer.innerHTML = `
+                <button id="load-btn" class="load-btn" onclick="run_voice_assistant_for_load()">LOAD GAME</button>
+                <p class="special" id="special"></p>
+            `;
+            document.getElementById('special').innerText = ' ';
+            resetInactivityTimer();
+        }
+    
+        function updateFooterToExpired() {
+            const footer = document.querySelector('.footer');
+            footer.classList.add('footer-center');
+            footer.innerHTML = `
+                <div class="goodbye">
+                    Session expired.<BR>Reload this page to try again.
+                </div>
+            `;
+        }
+    
+        function resetInactivityTimer() {
+            clearTimeout(inactivityTimeout);
+            inactivityTimeout = setTimeout(updateFooterToExpired, 30 * 60 * 1000); // 30 minutes
+        }
+    
+        document.addEventListener('DOMContentLoaded', function() {
+            resetInactivityTimer();
+            document.getElementById('sendCommandBtn').addEventListener('click', resetInactivityTimer);
+            document.getElementById('load-btn').addEventListener('click', resetInactivityTimer);
+        });
+    
+  
+        let responseReceived = false;
+
+async function startRecording() {
+    try {
+        responseReceived = false;
+        clearInterval(fetchInterval);
+        const recordBtn = document.getElementById('sendCommandBtn');
+        const sessionId = getSessionId();
+        if (recordBtn) {
+            recordBtn.disabled = true;
+
+            setTimeout(() => {
+                if (!responseReceived) {
+                    document.getElementById('special').innerText = '>> RECORDING <<';
+                    setTimeout(() => {
+                        if (!responseReceived) {
+                            document.getElementById('special').innerText = '>> SENDING...STANDBY <<';
+                            setTimeout(() => {
+                                if (!responseReceived) {
+                                    document.getElementById('special').innerText = '>> SUSPENSE BUILDS <<';
+                                    setTimeout(() => {
+                                        if (!responseReceived) {
+                                            document.getElementById('special').innerText = '>> DECODING... <<';
+                                        }
+                                    }, 7000);
+                                }
+                            }, 5000);
+                        }
+                    }, 5000);
+                }
+            }, 1000);
+
+            console.log('Recording started...');
+            lastButtonClickTime = new Date().getTime() / 1000;
+
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+            let mimeType;
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                mimeType = 'audio/webm;codecs=opus';
+            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                mimeType = 'audio/mp4';
+            } else {
+                throw new Error('No supported MIME types');
+            }
+
+            const options = { mimeType: mimeType };
+            const mediaRecorder = new MediaRecorder(stream, options);
+            const audioChunks = [];
+
+            mediaRecorder.addEventListener("dataavailable", event => {
+                audioChunks.push(event.data);
+            });
+
+            mediaRecorder.addEventListener("stop", async () => {
+                stopStream(stream);
+                const audioBlob = new Blob(audioChunks, { type: mimeType });
+                const formData = new FormData();
+                formData.append('user_audio', audioBlob, `audio.${mimeType.split('/')[1]}`);
+                formData.append('sessionId', sessionId);
+
+                const response = await fetch('/record', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                console.log('Data received from /record:', data);
+
+                if (data.status === 'success') {
+                    responseReceived = true;
+                    document.getElementById('special').innerText = ' ';
+                    await loadNewResponses();
+                } else {
+                    document.getElementById('special').innerText = 'Error during recording - Type 1: ' + data.message;
+                }
+                recordBtn.disabled = false;
+                fetchInterval = setInterval(loadNewResponses, 3000);
+            });
+
+            mediaRecorder.start();
+            setTimeout(() => {
+                mediaRecorder.stop();
+            }, 4000);
+        }
+    } catch (error) {
+        console.error('Error during /record fetch:', error.message);
+        document.getElementById('special').innerText = 'Error during recording - Type 2: ' + error.message;
+        const recordBtn = document.getElementById('sendCommandBtn');
+        if (recordBtn) {
+            recordBtn.disabled = false;
+        }
+        fetchInterval = setInterval(loadNewResponses, 3000);
+    }
+}
+
+
+        async function run_voice_assistant_for_load() {
+            try {
+                clearInterval(fetchInterval);
+                const loadBtn = document.getElementById('load-btn');
+                const sessionId = getSessionId();
+                if (loadBtn) {
+                    loadBtn.disabled = true;
+
+                    setTimeout(() => {
+                        document.getElementById('special').innerText = '>> RECORDING <<';
+                        setTimeout(() => {
+                            document.getElementById('special').innerText = '>> CHECKING PREVIOUS SAVES... <<';
+                        }, 5000);
+                    }, 1000);
+
+                    console.log('LOAD GAME button disabled');
+                    
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+                    let mimeType;
+                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                        mimeType = 'audio/webm;codecs=opus';
+                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        mimeType = 'audio/mp4';
+                    } else {
+                        throw new Error('No supported MIME types');
+                    }
+
+                    const options = { mimeType: mimeType };
+                    const mediaRecorder = new MediaRecorder(stream, options);
+                    const audioChunks = [];
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    mediaRecorder.addEventListener("stop", async () => {
+                        stopStream(stream);
+                        const audioBlob = new Blob(audioChunks, { type: mimeType });
+                        const formData = new FormData();
+                        formData.append('user_audio', audioBlob, `audio.${mimeType.split('/')[1]}`);
+                        formData.append('sessionId', sessionId);
+
+                        const response = await fetch('/load_game', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        const data = await response.json();
+                        console.log('Data received from /load_game:', data);
+
+                        if (data.status === 'success') {
+                            document.getElementById('special').innerText = data.message;
+                            console.log('LOAD GAME success:', data.message);
+                            await loadNewResponses();
+                        } else {
+                            document.getElementById('special').innerText = 'Error during recording - Type 3: ' + data.message;
+                            console.log('LOAD GAME error:', data.message);
+                            resetFooter();
+                        }
+                        loadBtn.disabled = false;
+                        fetchInterval = setInterval(loadNewResponses, 3000);
+                    });
+
+                    mediaRecorder.start();
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                    }, 4000);
+                }
+            } catch (error) {
+                console.error('Error during /load_game fetch:', error.message);
+                document.getElementById('special').innerText = 'Error during recording - Type 4: ' + error.message;
+                const loadBtn = document.getElementById('load-btn');
+                if (loadBtn) {
+                    loadBtn.disabled = false;
+                    console.log('LOAD GAME button re-enabled after error');
+                }
+                resetFooter();
+                fetchInterval = setInterval(loadNewResponses, 3000);
+            }
+        }
+
+
+        async function downsampleAudio(blob, sampleRate) {
+            const arrayBuffer = await blob.arrayBuffer();
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+            const offlineContext = new OfflineAudioContext(
+                audioBuffer.numberOfChannels,
+                audioBuffer.duration * sampleRate,
+                sampleRate
+            );
+            const bufferSource = offlineContext.createBufferSource();
+            bufferSource.buffer = audioBuffer;
+            bufferSource.connect(offlineContext.destination);
+            bufferSource.start(0);
+            const renderedBuffer = await offlineContext.startRendering();
+            const outputBuffer = new Float32Array(renderedBuffer.length * renderedBuffer.numberOfChannels);
+            for (let channel = 0; channel < renderedBuffer.numberOfChannels; channel++) {
+                outputBuffer.set(renderedBuffer.getChannelData(channel), channel * renderedBuffer.length);
+            }
+            const downsampledBlob = new Blob([new DataView(outputBuffer.buffer)], { type: 'audio/wav' });
+            return downsampledBlob;
+        }
+
+        async function loadInitialResponses() {
+            try {
+                console.log("Fetching initial responses...");
+                const sessionId = getSessionId();
+                const response = await fetch(`/initial_responses?sessionId=${sessionId}`, { method: 'GET' });
+                const data = await response.json();
+                console.log("Initial responses received:", data);
+                for (const responseItem of data.responses) {
+                    await displayResponse(responseItem);
+                }
+                initialResponsesLoaded = true;
+                const recordBtn = document.getElementById('sendCommandBtn');
+                if (recordBtn) {
+                    recordBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error during /initial_responses fetch:', error);
+            }
+        }
+
+        async function loadNewResponses() {
+            if (!initialResponsesLoaded) {
+                return;
+            }
+            try {
+                const sessionId = getSessionId();
+                const controller = new AbortController();
+                const signal = controller.signal;
+
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
+
+                const response = await fetch(`/new_responses?last_response_time=${lastResponseTime}&sessionId=${sessionId}`, { signal });
+                clearTimeout(timeoutId);
+
+                const data = await response.json();
+                if (data.responses.length > 0) {
+                    for (const responseItem of data.responses) {
+                        await displayResponse(responseItem);
+                    }
+                    lastResponseTime = new Date(data.responses[data.responses.length - 1].timestamp).getTime() / 1000;
+                }
+            } catch (error) {
+                if (error.name === 'AbortError') {
+                    console.error('Fetch request timed out.');
+                } else {
+                    console.error('Error during /new_responses fetch:', error);
+                }
+            }
+        }
+
+        let sessionPendingAudio = {};
+
+        async function fetchAudio(text) {
+            const sessionId = getSessionId();
+            console.log(`Fetching audio for session: ${sessionId}`); // Debugging log
+            const response = await fetch('/text_to_speech', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text, sessionId })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error('Failed to fetch audio:', errorText);
+                throw new Error('Failed to fetch audio');
+            }
+
+            const data = await response.json();
+            console.log('Text-to-speech response:', data);
+
+            const audioContent = data.audio_content;
+            if (!audioContent) {
+                throw new Error('No audio content received');
+            }
+
+            const audioBlob = new Blob([Uint8Array.from(atob(audioContent), c => c.charCodeAt(0))], { type: 'audio/mpeg' });
+            const audioUrl = URL.createObjectURL(audioBlob);
+
+            return audioUrl;
+        }
+
+
+        async function add_response_oscar(text) {
+            const sessionId = getSessionId();
+            console.log(`Adding response for Oscar in session: ${sessionId}`); // Debugging log
+            const audioUrl = await fetchAudio(text);
+            sessionPendingAudio[sessionId] = audioUrl;
+            console.log(`Stored audio URL for session ${sessionId}: ${audioUrl}`); // Debugging log
+
+            // Immediately play the audio for this session
+            playAudio(audioUrl);
+        }
+
+
+        let isPlaying = false;
+
+        async function displayResponse(response) {
+            let responseLogDiv = document.getElementById('responses');
+            const sessionId = getSessionId();
+            if (displayedResponses.has(response.timestamp)) {
+                return;
+            }
+            displayedResponses.add(response.timestamp);
+            lastResponseTime = new Date(response.timestamp).getTime() / 1000;
+
+            if (response.id === 'oscar') {
+                // Do nothing for 'oscar', handled in add_response()
+            } else if (response.id === 'goodbye') {
+                updateFooterToGoodbye();
+            } else if (response.id === 'load') {
+                updateFooterToLoad();
+            } else if (response.id === 'audio') {
+                playAudio(response.audio_url);
+            } else if (response.id === 'default') {
+                resetFooter();
+            } else {
+                let p = document.createElement('p');
+                p.innerText = response.text;
+                p.className = response.id || 'response';
+                responseLogDiv.appendChild(p);
+            }
+
+            // Trigger audio if there's pending audio for the session
+            if (sessionPendingAudio[sessionId]) {
+                console.log(`Playing pending audio for session ${sessionId}: ${sessionPendingAudio[sessionId]}`); // Debugging log
+                playAudio(sessionPendingAudio[sessionId]);
+                delete sessionPendingAudio[sessionId];
+            }
+
+            scrollToBottom();
+
+            await new Promise(resolve => setTimeout(resolve, response.delay * 1000));
+        }
+
+
+        function playAudio(url) {
+            console.log(`Playing audio from URL: ${url}`); // Debugging log
+            const audio = new Audio(url);
+            audio.play().catch(error => {
+                console.error('Error playing audio:', error);
+            });
+        }
+
+        async function readAloud(text) {
+            if (isPlaying) return; // Prevent multiple calls
+            isPlaying = true;
+
+            const sessionId = getSessionId();
+            console.log(`Reading aloud text for session: ${sessionId}`); // Debugging log
+
+            try {
+                const response = await fetch('/text_to_speech', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ text, sessionId })
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    console.error('Failed to read aloud text:', errorText);
+                    throw new Error('Failed to read aloud text');
+                }
+
+                const data = await response.json();
+                console.log('Text-to-speech response:', data);
+
+                const audioContent = data.audio_content;
+                if (!audioContent) {
+                    throw new Error('No audio content received');
+                }
+
+                const audioBlob = new Blob([new Uint8Array(audioContent.split('').map(char => char.charCodeAt(0)))], { type: 'audio/mpeg' });
+                const audioUrl = URL.createObjectURL(audioBlob);
+                playAudio(audioUrl);
+            } catch (error) {
+                console.error('Error during text-to-speech:', error);
+                document.getElementById('special').innerText = `Error during text-to-speech: ${error.message}`;
+            } finally {
+                isPlaying = false;
+            }
+        }
+
+
+        function generateSessionId() {
+            return '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function getSessionId() {
+            let sessionId = document.cookie.split('; ').find(row => row.startsWith('sessionId='));
+            if (!sessionId) {
+                sessionId = generateSessionId();
+                document.cookie = `sessionId=${sessionId}; path=/`;
+            } else {
+                sessionId = sessionId.split('=')[1];
+            }
+            return sessionId;
+        }
+
+        function stopStream(stream) {
+            stream.getTracks().forEach(track => track.stop());
+        }
+
+        function scrollToBottom() {
+            let contentDiv = document.querySelector('.content');
+            contentDiv.scrollTop = contentDiv.scrollHeight;
+        }
+
+        window.onload = function () {
+            const recordBtn = document.getElementById('sendCommandBtn');
+            if (recordBtn) {
+                recordBtn.disabled = true;
+            }
+            loadInitialResponses();
+            fetchInterval = setInterval(loadNewResponses, 5000);
+        };
+    </script>
+</head>
+<body>
+    <h1>Cleanerbot Rescue</h1>
+    <div class="content" id="response-log">
+        <div id="responses"></div>
+    </div>
+    <div class="footer">
+        <button id="sendCommandBtn" class="send-command-btn" onclick="startRecording()">SEND COMMAND</button>
+        <p class="special" id="special"></p>
+    </div>
+    <button class="button button5 top-right-button" id="wtfButton">WTF?</button>
+    <script>
+        document.getElementById("wtfButton").addEventListener("mouseover", function() {
+            this.textContent = "What's This For?";
+        });
+        
+        document.getElementById("wtfButton").addEventListener("mouseout", function() {
+            this.textContent = "WTF?";
+        });
+    
+        document.getElementById("wtfButton").addEventListener("click", function(event) {
+            event.preventDefault(); // Prevent the default click behavior
+            const originalText = this.textContent;
+            this.textContent = "What's This For?";
+    
+            // Open a temporary blank tab
+            const newTab = window.open("about:blank", "_blank");
+    
+            // Use setTimeout to delay the redirection
+            setTimeout(() => {
+                // Change the location of the new tab to the desired URL
+                newTab.location.href = "https://andresvarela.com/";
+                // Restore the button text after redirection
+                this.textContent = originalText;
+            }, 1000); // 1000 milliseconds = 1 second
+        });
+    </script>
+    
+</body>
+</html>
