@@ -1,4 +1,4 @@
-# cleanerbot_rescue
+# Cleanerbot Rescue
 
 Can cheap, fast, Natural Language Processing be the brains inside a game? Could I find out without building just another chatbot?
 
