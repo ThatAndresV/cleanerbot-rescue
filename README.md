@@ -73,12 +73,14 @@ That response_log is then parsed and presented to the player on a webpage. Most 
 	You'll need to create an area in which you can host the game. That's where all the other files go.
 
 
-## Confgiguration
+## Configuration
 
 **Environment Variables**:
 	- `your_anthropic_api_key`: Your Anthropic API key
  	- `GOOGLE_APPLICATION_CREDENTIALS`: Path to your Google Cloud credentials JSON file.
   	- `GCS_BUCKET_NAME`: The name of your GCS bucket.
+
+   *** Don't forget that as well as adding the path to your Google Cloud credentials you'll need to include the JSON file itself in your version ***
 
 ## Code Overview
 
