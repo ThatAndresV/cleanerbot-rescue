@@ -442,7 +442,7 @@ def endgame():
             add_response('The average number of actions in a succesful mission is currently ' + str(round(actionav)) + ', with an average of '+ str(round(actionav - errorav)) + ' messages understood.\n', delay=3)
             add_response_goodbye('Thanks for playing. Tell a friend.', delay=3)
 
-def transcribe_audio(audio, encoding=speech.RecognitionConfig.AudioEncoding.WEBM_OPUS, sample_rate=48000):
+def transcribe_audio(audio, encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16, sample_rate=48000):
     client = speech.SpeechClient()
     audio = speech.RecognitionAudio(content=audio)
     config = speech.RecognitionConfig(
@@ -568,12 +568,11 @@ def load_game():
         audio_content = audio_file.read()
 
         # Check MIME type and adjust encoding accordingly
-        if audio_file.mimetype == 'audio/mp4':
-            encoding = speech.RecognitionConfig.AudioEncoding.MP4
-            sample_rate = 48000
-        else:  # Default to WEBM_OPUS
-            encoding = speech.RecognitionConfig.AudioEncoding.WEBM_OPUS
-            sample_rate = 48000
+        if audio_file.mimetype == 'audio/wav':
+            encoding = speech.RecognitionConfig.AudioEncoding.LINEAR16
+            sample_rate = 48000  # Updated sample rate
+        else:
+            return jsonify({'status': 'error', 'message': 'Unsupported audio format'}), 400
 
         user_text = transcribe_audio(audio_content, encoding=encoding, sample_rate=sample_rate)
         user_text = user_text.lower()
@@ -592,7 +591,6 @@ def load_game():
         add_response_special(f'>> ERROR << {str(e)}\n')
         reset_footer()
         return jsonify({'status': 'error', 'message': str(e), 'reset_footer': True})
-
 
 @app.route('/reset_footer', methods=['POST'])
 def reset_footer():
@@ -618,12 +616,9 @@ def record_endpoint():
         audio_content = audio_file.read()
 
         # Check MIME type and adjust encoding accordingly
-        if audio_file.mimetype == 'audio/mp4':
-            encoding = speech.RecognitionConfig.AudioEncoding.MP4
-            sample_rate = 48000
-        elif audio_file.mimetype == 'audio/webm':
-            encoding = speech.RecognitionConfig.AudioEncoding.WEBM_OPUS
-            sample_rate = 48000
+        if audio_file.mimetype == 'audio/wav':
+            encoding = speech.RecognitionConfig.AudioEncoding.LINEAR16
+            sample_rate = 48000  # Updated sample rate
         else:
             return jsonify({'status': 'error', 'message': 'Unsupported audio format'}), 400
 
