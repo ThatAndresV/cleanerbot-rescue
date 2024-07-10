@@ -2,13 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+    <link rel="manifest" href="/static/site.webmanifest">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cleanerbot Rescue</title>
+    <title>Play Cleanerbot Rescue</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Open Graph tags -->
+    <meta property="og:title" content="Play Cleanerbot Rescue" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://dulcet-buttress-422311-g5.et.r.appspot.com/" />
+    <meta property="og:image" content="/static/inSpaceCard_1200x627.png" />
+    <meta property="og:description" content="An AI-powered, voice-driven text adventure by Andres Varela. Source and tutorial in WTF link." />
+    <meta property="og:site_name" content="Play Cleanerbot Rescue" />
+    <!-- Twitter Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Play Cleanerbot Rescue">
+    <meta name="twitter:description" content="An AI-powered, voice-driven text adventure by Andres Varela. Source and tutorial in WTF link.">
+    <meta name="twitter:image" content="/static/inSpaceCard_1200x675.png">
+
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="00b7d890-141b-4ea9-9d6f-b8cf13015c50"></script>
     <style>
         body {
             background-color: black;
@@ -230,9 +244,10 @@
             footer.innerHTML = `
                 <div class="goodbye">
                     Thanks for playing.<BR>Tell a friend.<BR>
-                    <a href="#" class="fa fa-linkedin"></a>
-                    <a href="#" class="fa fa-facebook"></a>
-                    <a href="#" class="fa fa-twitter"></a>
+                    <a href="https://linkedin.com/shareArticle?mini=true&url=https://dulcet-buttress-422311-g5.et.r.appspot.com/&title=Play%20Cleanerbot%20Rescue
+" class="fa fa-linkedin"></a>
+                    <a href="https://www.facebook.com/sharer.php?u=https://dulcet-buttress-422311-g5.et.r.appspot.com/" class="fa fa-facebook"></a>
+                    <a href="https://twitter.com/share?url=https://dulcet-buttress-422311-g5.et.r.appspot.com/&text=Play%20Cleanerbot%20Rescue" class="fa fa-twitter"></a>
                 </div>
             `;
         }
@@ -319,12 +334,11 @@ async function startRecording() {
             lastButtonClickTime = new Date().getTime() / 1000;
 
             const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-
             let mimeType;
             if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
                 mimeType = 'audio/webm;codecs=opus';
-            } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                mimeType = 'audio/mp4';
+            } else if (MediaRecorder.isTypeSupported('audio/mp4;codecs=mp4a.40.2')) {
+                mimeType = 'audio/mp4;codecs=mp4a.40.2';
             } else {
                 throw new Error('No supported MIME types');
             }
@@ -340,8 +354,12 @@ async function startRecording() {
             mediaRecorder.addEventListener("stop", async () => {
                 stopStream(stream);
                 const audioBlob = new Blob(audioChunks, { type: mimeType });
+                
+                // Downsample the audio to WAV
+                const downsampledBlob = await downsampleAudio(audioBlob, 48000);
+                
                 const formData = new FormData();
-                formData.append('user_audio', audioBlob, `audio.${mimeType.split('/')[1]}`);
+                formData.append('user_audio', downsampledBlob, `audio.wav`);
                 formData.append('sessionId', sessionId);
 
                 const response = await fetch('/record', {
@@ -378,110 +396,139 @@ async function startRecording() {
     }
 }
 
+async function run_voice_assistant_for_load() {
+    try {
+        clearInterval(fetchInterval);
+        const loadBtn = document.getElementById('load-btn');
+        const sessionId = getSessionId();
+        if (loadBtn) {
+            loadBtn.disabled = true;
 
-        async function run_voice_assistant_for_load() {
-            try {
-                clearInterval(fetchInterval);
-                const loadBtn = document.getElementById('load-btn');
-                const sessionId = getSessionId();
-                if (loadBtn) {
-                    loadBtn.disabled = true;
+            setTimeout(() => {
+                document.getElementById('special').innerText = '>> RECORDING <<';
+                setTimeout(() => {
+                    document.getElementById('special').innerText = '>> CHECKING PREVIOUS SAVES... <<';
+                }, 5000);
+            }, 1000);
 
-                    setTimeout(() => {
-                        document.getElementById('special').innerText = '>> RECORDING <<';
-                        setTimeout(() => {
-                            document.getElementById('special').innerText = '>> CHECKING PREVIOUS SAVES... <<';
-                        }, 5000);
-                    }, 1000);
+            console.log('LOAD GAME button disabled');
 
-                    console.log('LOAD GAME button disabled');
-                    
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            let mimeType;
+            if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+                mimeType = 'audio/webm;codecs=opus';
+            } else if (MediaRecorder.isTypeSupported('audio/mp4;codecs=mp4a.40.2')) {
+                mimeType = 'audio/mp4;codecs=mp4a.40.2';
+            } else {
+                throw new Error('No supported MIME types');
+            }
 
-                    let mimeType;
-                    if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-                        mimeType = 'audio/webm;codecs=opus';
-                    } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-                        mimeType = 'audio/mp4';
-                    } else {
-                        throw new Error('No supported MIME types');
-                    }
+            const options = { mimeType: mimeType };
+            const mediaRecorder = new MediaRecorder(stream, options);
+            const audioChunks = [];
 
-                    const options = { mimeType: mimeType };
-                    const mediaRecorder = new MediaRecorder(stream, options);
-                    const audioChunks = [];
+            mediaRecorder.addEventListener("dataavailable", event => {
+                audioChunks.push(event.data);
+            });
 
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
+            mediaRecorder.addEventListener("stop", async () => {
+                stopStream(stream);
+                const audioBlob = new Blob(audioChunks, { type: mimeType });
 
-                    mediaRecorder.addEventListener("stop", async () => {
-                        stopStream(stream);
-                        const audioBlob = new Blob(audioChunks, { type: mimeType });
-                        const formData = new FormData();
-                        formData.append('user_audio', audioBlob, `audio.${mimeType.split('/')[1]}`);
-                        formData.append('sessionId', sessionId);
+                // Downsample the audio to WAV
+                const downsampledBlob = await downsampleAudio(audioBlob, 48000);
 
-                        const response = await fetch('/load_game', {
-                            method: 'POST',
-                            body: formData
-                        });
-                        const data = await response.json();
-                        console.log('Data received from /load_game:', data);
+                const formData = new FormData();
+                formData.append('user_audio', downsampledBlob, `audio.wav`);
+                formData.append('sessionId', sessionId);
 
-                        if (data.status === 'success') {
-                            document.getElementById('special').innerText = data.message;
-                            console.log('LOAD GAME success:', data.message);
-                            await loadNewResponses();
-                        } else {
-                            document.getElementById('special').innerText = 'Error during recording - Type 3: ' + data.message;
-                            console.log('LOAD GAME error:', data.message);
-                            resetFooter();
-                        }
-                        loadBtn.disabled = false;
-                        fetchInterval = setInterval(loadNewResponses, 3000);
-                    });
+                const response = await fetch('/load_game', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+                console.log('Data received from /load_game:', data);
 
-                    mediaRecorder.start();
-                    setTimeout(() => {
-                        mediaRecorder.stop();
-                    }, 4000);
+                if (data.status === 'success') {
+                    document.getElementById('special').innerText = data.message;
+                    console.log('LOAD GAME success:', data.message);
+                    await loadNewResponses();
+                } else {
+                    document.getElementById('special').innerText = 'Error during recording - Type 3: ' + data.message;
+                    console.log('LOAD GAME error:', data.message);
+                    resetFooter();
                 }
-            } catch (error) {
-                console.error('Error during /load_game fetch:', error.message);
-                document.getElementById('special').innerText = 'Error during recording - Type 4: ' + error.message;
-                const loadBtn = document.getElementById('load-btn');
-                if (loadBtn) {
-                    loadBtn.disabled = false;
-                    console.log('LOAD GAME button re-enabled after error');
-                }
-                resetFooter();
+                loadBtn.disabled = false;
                 fetchInterval = setInterval(loadNewResponses, 3000);
-            }
-        }
+            });
 
-
-        async function downsampleAudio(blob, sampleRate) {
-            const arrayBuffer = await blob.arrayBuffer();
-            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-            const offlineContext = new OfflineAudioContext(
-                audioBuffer.numberOfChannels,
-                audioBuffer.duration * sampleRate,
-                sampleRate
-            );
-            const bufferSource = offlineContext.createBufferSource();
-            bufferSource.buffer = audioBuffer;
-            bufferSource.connect(offlineContext.destination);
-            bufferSource.start(0);
-            const renderedBuffer = await offlineContext.startRendering();
-            const outputBuffer = new Float32Array(renderedBuffer.length * renderedBuffer.numberOfChannels);
-            for (let channel = 0; channel < renderedBuffer.numberOfChannels; channel++) {
-                outputBuffer.set(renderedBuffer.getChannelData(channel), channel * renderedBuffer.length);
-            }
-            const downsampledBlob = new Blob([new DataView(outputBuffer.buffer)], { type: 'audio/wav' });
-            return downsampledBlob;
+            mediaRecorder.start();
+            setTimeout(() => {
+                mediaRecorder.stop();
+            }, 4000);
         }
+    } catch (error) {
+        console.error('Error during /load_game fetch:', error.message);
+        document.getElementById('special').innerText = 'Error during recording - Type 4: ' + error.message;
+        const loadBtn = document.getElementById('load-btn');
+        if (loadBtn) {
+            loadBtn.disabled = false;
+            console.log('LOAD GAME button re-enabled after error');
+        }
+        resetFooter();
+        fetchInterval = setInterval(loadNewResponses, 3000);
+    }
+}
+
+async function downsampleAudio(blob, sampleRate) {
+    const arrayBuffer = await blob.arrayBuffer();
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    const offlineContext = new OfflineAudioContext(
+        audioBuffer.numberOfChannels,
+        audioBuffer.duration * sampleRate,
+        sampleRate
+    );
+    const bufferSource = offlineContext.createBufferSource();
+    bufferSource.buffer = audioBuffer;
+    bufferSource.connect(offlineContext.destination);
+    bufferSource.start(0);
+    const renderedBuffer = await offlineContext.startRendering();
+    const outputBuffer = new Float32Array(renderedBuffer.length * renderedBuffer.numberOfChannels);
+    for (let channel = 0; channel < renderedBuffer.numberOfChannels; channel++) {
+        outputBuffer.set(renderedBuffer.getChannelData(channel), channel * renderedBuffer.length);
+    }
+    const wavBuffer = new Uint8Array(outputBuffer.length * 2);
+    for (let i = 0; i < outputBuffer.length; i++) {
+        const sample = outputBuffer[i];
+        const clampedSample = Math.max(-1, Math.min(1, sample));
+        const intSample = clampedSample < 0 ? clampedSample * 0x8000 : clampedSample * 0x7FFF;
+        wavBuffer[i * 2] = intSample;
+        wavBuffer[i * 2 + 1] = intSample >> 8;
+    }
+    const wavHeader = new DataView(new ArrayBuffer(44));
+    writeString(wavHeader, 0, 'RIFF');
+    wavHeader.setUint32(4, 44 + wavBuffer.length - 8, true);
+    writeString(wavHeader, 8, 'WAVE');
+    writeString(wavHeader, 12, 'fmt ');
+    wavHeader.setUint32(16, 16, true);
+    wavHeader.setUint16(20, 1, true);
+    wavHeader.setUint16(22, renderedBuffer.numberOfChannels, true);
+    wavHeader.setUint32(24, sampleRate, true);
+    wavHeader.setUint32(28, sampleRate * 2 * renderedBuffer.numberOfChannels, true);
+    wavHeader.setUint16(32, renderedBuffer.numberOfChannels * 2, true);
+    wavHeader.setUint16(34, 16, true);
+    writeString(wavHeader, 36, 'data');
+    wavHeader.setUint32(40, wavBuffer.length, true);
+    const wavFile = new Blob([wavHeader, wavBuffer], { type: 'audio/wav' });
+    return wavFile;
+}
+
+function writeString(view, offset, string) {
+    for (let i = 0; i < string.length; i++) {
+        view.setUint8(offset + i, string.charCodeAt(i));
+    }
+}
 
         async function loadInitialResponses() {
             try {
